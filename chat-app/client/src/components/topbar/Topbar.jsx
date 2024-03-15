@@ -11,7 +11,7 @@ const Topbar = () => {
     <>
       <div className="m-2 flex items-center justify-between ">
         <div
-          className="avatar online cursor-pointer relative"
+          className="avatar  cursor-pointer relative"
           onClick={() => setShow(!show)}
         >
           <div className="w-12 rounded-full">
