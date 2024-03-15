@@ -1,25 +1,36 @@
 import { BsThreeDotsVertical } from "react-icons/bs";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
+import useConversation from "../../zustand/useConversaion";
+import { useEffect } from "react";
 
 const MessagesContainer = () => {
-  const noChatSelected = true;
+  const { selectedConversation, setSelectedConversation } = useConversation();
+
+  useEffect(() => {
+    // cleanup function to unmount
+    return () => setSelectedConversation(null);
+  }, [setSelectedConversation]);
+
+  // const noChatSelected = true;
   return (
     <div className="flex flex-col h-full w-full relative">
-      {/* Header */}
-      {noChatSelected ? (
+      {!selectedConversation ? (
         <NoChatSelected />
       ) : (
         <>
-          <div className="flex items-center justify-between px-3 py-2 border-b">
+          {/* Header */}
+          <div className="flex items-center  justify-between px-3 py-2 border-b">
             <div className="flex gap-3">
               <div className="avatar online cursor-pointer">
                 <div className="w-12 rounded-full">
-                  <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+                  <img src={selectedConversation.profilePic} />
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-medium">Tushar Sahu</h2>
+                <h2 className="text-xl font-medium">
+                  {selectedConversation.fullName}
+                </h2>
                 <p>Online</p>
               </div>
             </div>
