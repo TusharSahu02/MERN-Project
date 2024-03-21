@@ -10,11 +10,12 @@ import { Link } from "react-router-dom";
 import Threads from "../modals/Threads";
 import { toast } from "sonner";
 import userAtom from "@/atom/userAtom";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 
 const Topbar = () => {
   const [activeIcon, setActiveIcon] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [userEdit, setUserEdit] = useRecoilState(userAtom);
 
   const setUser = useSetRecoilState(userAtom);
 
@@ -39,12 +40,12 @@ const Topbar = () => {
         },
       });
       const data = await res.json();
-      console.log(data);
 
       if (data.error) {
         toast.error(data.error, {
           duration: 2000,
         });
+        return;
       }
       localStorage.removeItem("user-chipper");
       // window.location.reload();
@@ -116,7 +117,7 @@ const Topbar = () => {
             />
           </Link>
           <Link
-            to={"/profile"}
+            to={`/@${userEdit.username}`}
             className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 ${
               activeIcon === "profile" && "text-white"
             }`}

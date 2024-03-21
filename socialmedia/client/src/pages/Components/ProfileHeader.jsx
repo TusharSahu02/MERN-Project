@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { toast } from "sonner";
 
@@ -26,12 +26,35 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Threads from "./Threads";
 import Replies from "./Replies";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import userAtom from "@/atom/userAtom";
 
+import { MdModeEditOutline } from "react-icons/md";
+import { Textarea } from "@/components/ui/textarea";
+import Settings from "../modals/Settings";
+import Profile from "../modals/Profile";
+import usePreviewImage from "@/hooks/usePreviewImage";
+
 const ProfileHeader = () => {
+  const [userEdit, setUserEdit] = useRecoilState(userAtom);
   const [activeTab, setActiveTab] = useState("threads");
+  const [showModal, setShowModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const setUser = useSetRecoilState(userAtom);
+  const [inputs, setInputs] = useState({
+    name: userEdit.name,
+    username: userEdit.username,
+    email: userEdit.email,
+    bio: userEdit.bio,
+  });
+
+  const fileRef = useRef(null);
+
+  const { handleImageChange, imgURL } = usePreviewImage();
+
+  const isProfilePic = userEdit.profilePic
+    ? userEdit.profilePic
+    : "https://preview.redd.it/reddit-avatars-anyone-v0-0yghd1cewi0a1.png?width=587&format=png&auto=webp&s=54c04fa2f1c795ac2d5c112d5ad1a0015f696775";
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -46,25 +69,86 @@ const ProfileHeader = () => {
     });
   };
 
+  const handleTextareaChange = (event) => {
+    setInputs({ ...inputs, bio: event.target.value });
+    adjustTextareaHeight(event.target);
+  };
+
+  const adjustTextareaHeight = (element) => {
+    element.style.height = "auto";
+    element.style.height = element.scrollHeight + "px";
+  };
+
   const handleLogout = async () => {
     try {
-      const res = fetch("/api/users/logout", {
+      const res = await fetch("/api/users/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
       });
       const data = await res.json();
-      console.log(data);
 
       if (data.error) {
         toast.error(data.error, {
           duration: 2000,
         });
+        return;
       }
       localStorage.removeItem("user-chipper");
       // window.location.reload();
       setUser(null);
+      toast.success(data.message, {
+        duration: 2000,
+      });
+    } catch (error) {
+      toast.error(error.message, {
+        duration: 2000,
+      });
+    }
+  };
+
+  const handleModal = () => {
+    setShowModal(true);
+    document.body.classList.add("modal-open");
+  };
+  const closeModal = () => {
+    setShowModal(false);
+    document.body.classList.remove("modal-open");
+  };
+  const handleProfileModal = () => {
+    setShowProfileModal(true);
+    document.body.classList.add("modal-open");
+  };
+  const closeProfileModal = () => {
+    setShowProfileModal(false);
+    document.body.classList.remove("modal-open");
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/users/update/${userEdit._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...inputs, profilePic: imgURL }),
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        toast.error(data.error, {
+          duration: 2000,
+        });
+        return;
+      }
+
+      toast.success("Profile Updated Successfully", {
+        duration: 2000,
+      });
+      setUser(data);
+      localStorage.setItem("user-chipper", JSON.stringify(data));
     } catch (error) {
       toast.error(error.message, {
         duration: 2000,
@@ -76,24 +160,27 @@ const ProfileHeader = () => {
     <div>
       <div className="flex justify-between items-center">
         <div className="w-[80%]">
-          <h1 className="text-2xl font-bold cursor-pointer">Tushar</h1>
+          <h1 className="text-2xl font-bold cursor-pointer">{userEdit.name}</h1>
           <div className="flex items-center">
-            <p className=" text-md">username_</p>
+            <p className=" text-md">{userEdit.username}</p>
             <div className="ml-1 px-3 py-1 text-[12px] rounded-full bg-gray-800 cursor-pointer">
               <p className="text-[#6B7280]">threads.net</p>
             </div>
           </div>
         </div>
-        <div className="size-[90px]  rounded-full cursor-pointer">
+        <div
+          className="size-[90px]  rounded-full cursor-pointer"
+          onClick={handleProfileModal}
+        >
           <img
-            className="h-full w-fill object-cover rounded-full"
-            src="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
+            className="h-full hover:opacity-50 transition-opacity  border-[1px] border-gray-700 w-full object-cover rounded-full"
+            src={isProfilePic}
             alt=""
           />
         </div>
       </div>
       <div>
-        <p>loading........</p>
+        <p>{userEdit.bio}</p>
       </div>
       <div className="my-3 flex items-center justify-between">
         <p className="text-sm text-gray-400 hover:underline transition-all w-max cursor-pointer">
@@ -110,7 +197,7 @@ const ProfileHeader = () => {
             <DropdownMenuItem className="cursor-pointer">
               Saved
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer ">
+            <DropdownMenuItem className="cursor-pointer " onClick={handleModal}>
               Settings
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -135,39 +222,73 @@ const ProfileHeader = () => {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              <div className="size-full cursor-pointer flex items-center justify-center">
+                <div className="relative ">
+                  <img
+                    className="size-[100px] object-cover rounded-full hover:opacity-50 transition-opacity duration-300"
+                    src={imgURL || isProfilePic}
+                    alt=""
+                    onClick={() => fileRef.current.click()}
+                  />
+                  <input
+                    type="file"
+                    hidden
+                    ref={fileRef}
+                    onChange={handleImageChange}
+                  />
+
+                  <div className="top-0 -right-2 size-8 flex items-center justify-center rounded-full bg-[#000000a3] absolute ml-3 ">
+                    <MdModeEditOutline size={22} />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Username
+                </Label>
+                <Input
+                  disabled
+                  defaultValue={`@${userEdit.username}`}
+                  className="col-span-3 bg-black"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  disabled
+                  defaultValue={userEdit.email}
+                  className="col-span-3 bg-black"
+                />
+              </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">
                   Name
                 </Label>
                 <Input
-                  id="name"
-                  defaultValue="Pedro Duarte"
                   className="col-span-3 bg-black"
+                  value={inputs.name}
+                  onChange={(e) =>
+                    setInputs({ ...inputs, name: e.target.value })
+                  }
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
-                  Username
-                </Label>
-                <Input
-                  id="username"
-                  defaultValue="@peduarte"
-                  className="col-span-3 bg-black"
-                />
-              </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="username" className="text-right">
                   Bio
                 </Label>
-                <Input
-                  id="username"
-                  defaultValue="loading..."
-                  className="col-span-3 bg-black"
+                <Textarea
+                  className="col-span-3  bg-black"
+                  onChange={handleTextareaChange}
+                  value={inputs.bio}
+                  placeholder="Add a bio"
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button onClick={handleSubmit}>Save changes</Button>
             </DialogFooter>
           </DialogContent>
         </div>
@@ -206,6 +327,13 @@ const ProfileHeader = () => {
       ></div>
       {activeTab === "threads" && <Threads />}
       {activeTab === "replies" && <Replies />}
+      {showModal && <Settings closeModal={closeModal} />}
+      {showProfileModal && (
+        <Profile
+          closeProfileModal={closeProfileModal}
+          isProfilePic={isProfilePic}
+        />
+      )}
     </div>
   );
 };
