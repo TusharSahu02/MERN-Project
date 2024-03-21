@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { toast } from "sonner";
 
@@ -26,9 +26,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Threads from "./Threads";
 import Replies from "./Replies";
+import { useSetRecoilState } from "recoil";
+import userAtom from "@/atom/userAtom";
 
 const ProfileHeader = () => {
   const [activeTab, setActiveTab] = useState("threads");
+  const setUser = useSetRecoilState(userAtom);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -41,6 +44,32 @@ const ProfileHeader = () => {
         duration: 2000,
       });
     });
+  };
+
+  const handleLogout = async () => {
+    try {
+      const res = fetch("/api/users/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      console.log(data);
+
+      if (data.error) {
+        toast.error(data.error, {
+          duration: 2000,
+        });
+      }
+      localStorage.removeItem("user-chipper");
+      // window.location.reload();
+      setUser(null);
+    } catch (error) {
+      toast.error(error.message, {
+        duration: 2000,
+      });
+    }
   };
 
   return (
@@ -84,7 +113,10 @@ const ProfileHeader = () => {
             <DropdownMenuItem className="cursor-pointer ">
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer ">
+            <DropdownMenuItem
+              className="cursor-pointer "
+              onClick={handleLogout}
+            >
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -98,7 +130,8 @@ const ProfileHeader = () => {
             <DialogHeader>
               <DialogTitle>Edit profile</DialogTitle>
               <DialogDescription>
-                Make changes to your profile here. Click save when you're done.
+                Make changes to your profile here. Click save when you&apos;re
+                done.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">

@@ -1,17 +1,22 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { BsThreads } from "react-icons/bs";
 import { GrHomeRounded } from "react-icons/gr";
 import { FiSearch, FiLogOut } from "react-icons/fi";
-import { IoCreateOutline, IoArrowBackOutline } from "react-icons/io5";
+import { IoCreateOutline } from "react-icons/io5";
 import { LuHeart } from "react-icons/lu";
 import { CiUser } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import Threads from "../modals/Threads";
+import { toast } from "sonner";
+import userAtom from "@/atom/userAtom";
+import { useSetRecoilState } from "recoil";
 
 const Topbar = () => {
   const [activeIcon, setActiveIcon] = useState("");
   const [showModal, setShowModal] = useState(false);
+
+  const setUser = useSetRecoilState(userAtom);
 
   const handleClick = (iconName) => {
     setActiveIcon(iconName);
@@ -23,6 +28,35 @@ const Topbar = () => {
   const closeModal = () => {
     setShowModal(false);
     document.body.classList.remove("modal-open");
+  };
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/users/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      console.log(data);
+
+      if (data.error) {
+        toast.error(data.error, {
+          duration: 2000,
+        });
+      }
+      localStorage.removeItem("user-chipper");
+      // window.location.reload();
+      setUser(null);
+      toast.success(data.message, {
+        duration: 2000,
+      });
+    } catch (error) {
+      toast.error(error.message, {
+        duration: 2000,
+      });
+    }
   };
 
   return (
@@ -95,7 +129,7 @@ const Topbar = () => {
             />
           </Link>
         </div>
-        <div>
+        <div onClick={handleLogout}>
           <FiLogOut size={26} color="#635f5f" className=" cursor-pointer" />
         </div>
       </div>
