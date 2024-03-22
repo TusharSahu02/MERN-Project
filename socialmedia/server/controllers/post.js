@@ -163,11 +163,11 @@ const getFeedPost = async (req, res) => {
 
     const following = user.following;
 
-    const feedposts = await Post.find({ author: { $in: following } }).sort({
+    const feedPosts = await Post.find({ author: { $in: following } }).sort({
       createdAt: -1,
     });
 
-    res.status(200).json({ feedposts });
+    res.status(200).json(feedPosts);
   } catch (error) {
     res.status(500).json({ error: error.message });
     console.log("Error in getFeedPost : ", error.mesage);

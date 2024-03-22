@@ -13,9 +13,10 @@ const Signup = () => {
     email: "",
     password: "",
   });
-
+  const [loading, setLoading] = useState(false);
   const setUser = useSetRecoilState(userAtom);
   const handleSignup = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/users/signup", {
         method: "POST",
@@ -42,6 +43,8 @@ const Signup = () => {
       toast.error(error.message, {
         duration: 2000,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,8 +99,12 @@ const Signup = () => {
         </div>
       </div>
       <div>
-        <Button className="w-full bg-white text-black" onClick={handleSignup}>
-          Signup
+        <Button
+          disabled={loading}
+          className="w-full bg-white border-white border text-black hover:bg-transparent hover:text-white hover:border-white transition-colors duration-300"
+          onClick={handleSignup}
+        >
+          {loading ? "Signing up..." : "Sign Up"}
         </Button>
       </div>
     </div>
@@ -105,4 +112,3 @@ const Signup = () => {
 };
 
 export default Signup;
-

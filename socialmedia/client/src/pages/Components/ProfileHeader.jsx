@@ -58,13 +58,14 @@ const ProfileHeader = ({ user }) => {
     user.followers.includes(currentUser._id)
   );
 
-  const isProfilePic = userEdit?.profilePic
-    ? userEdit?.profilePic
+  const isProfilePic = user?.profilePic
+    ? user?.profilePic
     : "https://preview.redd.it/reddit-avatars-anyone-v0-0yghd1cewi0a1.png?width=587&format=png&auto=webp&s=54c04fa2f1c795ac2d5c112d5ad1a0015f696775";
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
+  
   const copyUrl = () => {
     const currentUrl = window.location.href;
     navigator.clipboard.writeText(currentUrl).then(() => {
@@ -214,9 +215,9 @@ const ProfileHeader = ({ user }) => {
     <div>
       <div className="flex justify-between items-center">
         <div className="w-[80%]">
-          <h1 className="text-2xl font-bold cursor-pointer">{userEdit.name}</h1>
+          <h1 className="text-2xl font-bold cursor-pointer">{user.name}</h1>
           <div className="flex items-center">
-            <p className=" text-md">{userEdit.username}</p>
+            <p className=" text-md">{user.username}</p>
             <div className="ml-1 px-3 py-1 text-[12px] rounded-full bg-gray-800 cursor-pointer">
               <p className="text-[#6B7280]">threads.net</p>
             </div>
@@ -234,9 +235,9 @@ const ProfileHeader = ({ user }) => {
         </div>
       </div>
       <div>
-        <p>{userEdit.bio}</p>
+        <p>{user.bio}</p>
       </div>
-      <div className="my-3 flex items-center justify-between" testing>
+      <div className="my-3 flex items-center justify-between">
         <p className="text-sm text-gray-400 hover:underline transition-all w-max cursor-pointer">
           {user.followers.length} followers
         </p>

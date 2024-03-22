@@ -1,38 +1,55 @@
+import { useEffect, useState } from "react";
 import HomeThread from "./Components/HomeThread";
-import UserPost from "./Components/UserPost";
+import { toast } from "sonner";
+import Post from "./Components/Post";
 
 const Home = () => {
+  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const getFeedPost = async () => {
+      try {
+        const res = await fetch("/api/posts/feed");
+        const data = await res.json();
+        if (data.error) {
+          toast.error(data.error, {
+            duration: 2000,
+          });
+          return;
+        }
+        setPosts(data);
+      } catch (error) {
+        toast.error(error.message, {
+          duration: 2000,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getFeedPost();
+  }, []);
+
   return (
     <>
       <HomeThread />
-      <UserPost
-        likes={1200}
-        replies={200}
-        avatar="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
-        postImg="https://images.unsplash.com/photo-1710595638861-a6f9680649b6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        postTitle="loading tushar..."
-      />
-      <UserPost
-        likes={200}
-        replies={100}
-        avatar="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
-        postImg="https://images.unsplash.com/photo-1710401421451-bc096d4667f5?q=80&w=1920&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        postTitle="loading2tushar..."
-      />
-      <UserPost
-        likes={12400}
-        replies={2300}
-        avatar="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
-        postImg="https://images.unsplash.com/photo-1707344088547-3cf7cea5ca49?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        postTitle="loading 3 tushar..."
-      />
-      <UserPost
-        likes={61200}
-        replies={1200}
-        avatar="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
-        postImg="https://images.unsplash.com/photo-1710097092298-75d5c777a9bf?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        postTitle="loading 4 tushar..."
-      />
+      {loading && (
+        <>
+          <h1>loading...</h1>
+        </>
+      )}
+
+      {!loading && posts.length === 0 && (
+        <>
+          <h1>No posts found</h1>
+          <h1>Follow some accounts to see posts</h1>
+        </>
+      )}
+
+      {posts.map((post) => (
+        <Post key={post._id} post={post} author={post.author} />
+      ))}
     </>
   );
 };

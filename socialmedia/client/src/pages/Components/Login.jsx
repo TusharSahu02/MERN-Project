@@ -11,8 +11,10 @@ const Login = () => {
     username: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
   const setUser = useSetRecoilState(userAtom);
   const handleLogin = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/users/login", {
         method: "POST",
@@ -42,6 +44,8 @@ const Login = () => {
         duration: 2000,
         richColors: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,7 +73,12 @@ const Login = () => {
         </div>
       </div>
       <div onClick={handleLogin}>
-        <Button className="w-full bg-white text-black">Login</Button>
+        <Button
+          disabled={loading}
+          className="w-full bg-white border-white border text-black hover:bg-transparent hover:text-white hover:border-white transition-colors duration-300"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </Button>
       </div>
     </div>
   );
