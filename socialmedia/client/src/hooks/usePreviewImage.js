@@ -14,7 +14,9 @@ const usePreviewImage = () => {
       };
       reader.readAsDataURL(file);
     } else {
-      toast.error("Please upload an image");
+      toast.error("Please upload an image", {
+        richColors: true,
+      });
       setImgURL("");
     }
   };
@@ -22,6 +24,7 @@ const usePreviewImage = () => {
   return {
     imgURL,
     handleImageChange,
+    setImgURL,
   };
 };
 

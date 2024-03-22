@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { toast } from "sonner";
 
@@ -38,9 +38,13 @@ const ProfileHeader = ({ user }) => {
   const [userEdit, setUserEdit] = useRecoilState(userAtom);
   const [activeTab, setActiveTab] = useState("threads");
   const [showModal, setShowModal] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const setUser = useSetRecoilState(userAtom);
+  const fileRef = useRef(null);
+
+  const { handleImageChange, imgURL } = usePreviewImage();
 
   const [inputs, setInputs] = useState({
     name: userEdit.name,
@@ -49,16 +53,10 @@ const ProfileHeader = ({ user }) => {
     bio: userEdit.bio,
   });
 
-  const [updating, setUpdating] = useState(false);
-
   const currentUser = useRecoilValue(userAtom);
   const [following, setFollowing] = useState(
     user.followers.includes(currentUser._id)
   );
-
-  const fileRef = useRef(null);
-
-  const { handleImageChange, imgURL } = usePreviewImage();
 
   const isProfilePic = userEdit?.profilePic
     ? userEdit?.profilePic
@@ -70,7 +68,7 @@ const ProfileHeader = ({ user }) => {
   const copyUrl = () => {
     const currentUrl = window.location.href;
     navigator.clipboard.writeText(currentUrl).then(() => {
-      toast("Copied to clipboard", {
+      toast.message("Copied to clipboard", {
         icon: "📋",
         duration: 2000,
       });
@@ -238,7 +236,7 @@ const ProfileHeader = ({ user }) => {
       <div>
         <p>{userEdit.bio}</p>
       </div>
-      <div className="my-3 flex items-center justify-between"testing  >
+      <div className="my-3 flex items-center justify-between" testing>
         <p className="text-sm text-gray-400 hover:underline transition-all w-max cursor-pointer">
           {user.followers.length} followers
         </p>

@@ -1,11 +1,23 @@
 import { MdOutlinePermMedia } from "react-icons/md";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { useState, useRef, useEffect } from "react";
+import usePreviewImage from "@/hooks/usePreviewImage";
+import { toast } from "sonner";
+import { useRecoilValue } from "recoil";
+import userAtom from "@/atom/userAtom";
+
+const MAX_CHARS = 500;
 
 const Threads = ({ closeModal }) => {
   const [textareaValue, setTextareaValue] = useState("");
   const modalRef = useRef(null);
+  const imageRef = useRef(null);
+  const user = useRecoilValue(userAtom);
+  const [updating, setUpdating] = useState(false);
 
+  const [remainingChars, setRemainingChars] = useState(MAX_CHARS);
+
+  const { handleImageChange, imgURL, setImgURL } = usePreviewImage();
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -21,13 +33,58 @@ const Threads = ({ closeModal }) => {
   }, [closeModal]);
 
   const handleTextareaChange = (event) => {
-    setTextareaValue(event.target.value);
+    const inputText = event.target.value;
+    if (inputText.length > MAX_CHARS) {
+      toast.message("You can't post more than 500 characters.", {
+        duration: 2000,
+        position: "top-center",
+      });
+      const truncatedText = inputText.slice(0, MAX_CHARS);
+      setTextareaValue(truncatedText);
+      setRemainingChars(0);
+    } else {
+      setTextareaValue(inputText);
+      setRemainingChars(MAX_CHARS - inputText.length);
+    }
     adjustTextareaHeight(event.target);
-  }; 
+  };
 
   const adjustTextareaHeight = (element) => {
     element.style.height = "auto";
     element.style.height = element.scrollHeight + "px";
+  };
+
+  const handleCreatePost = async () => {
+    try {
+      setUpdating(true);
+      const res = await fetch("/api/posts/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          author: user._id,
+          text: textareaValue,
+          image: imgURL,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      toast.success("Post created successfully");
+      closeModal();
+      setTextareaValue("");
+      setImgURL("");
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   return (
@@ -59,17 +116,51 @@ const Threads = ({ closeModal }) => {
                   onChange={handleTextareaChange}
                   value={textareaValue}
                 ></textarea>
-
-                <MdOutlinePermMedia
-                  size={22}
-                  className="text-gray-500 cursor-pointer"
-                />
+                {/* TODO: < Add : Drag and Drop feature >*/}
+                {imgURL && (
+                  <div className="w-full relative flex justify-center my-2">
+                    <img
+                      src={imgURL}
+                      alt="selected Image"
+                      className="w-full object-cover"
+                    />
+                    <div className=" size-7 flex items-center justify-center bg-gray-600 rounded-full absolute top-0 right-0">
+                      <IoIosCloseCircleOutline
+                        size={24}
+                        color="#a7a0a0"
+                        onClick={() => {
+                          setImgURL("");
+                        }}
+                        className="cursor-pointer "
+                      />
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <MdOutlinePermMedia
+                    size={22}
+                    onClick={() => imageRef.current?.click()}
+                    className="text-gray-500 cursor-pointer"
+                  />
+                  <input
+                    type="file"
+                    hidden
+                    ref={imageRef}
+                    onChange={handleImageChange}
+                  />
+                  <p className="text-gray-500 text-xs">
+                    {remainingChars} / {MAX_CHARS}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
           <div className="w-full flex justify-end">
-            <div className="  cursor-pointer  text-black font-bold rounded-full bg-[#fff] px-4 py-1">
-              Post
+            <div
+              className="  cursor-pointer  text-black font-bold rounded-full bg-[#fff] px-4 py-1"
+              onClick={handleCreatePost}
+            >
+              {updating ? "uploading.." : "Post"}
             </div>
           </div>
         </div>

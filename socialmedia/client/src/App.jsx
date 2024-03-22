@@ -9,11 +9,9 @@ export default function App() {
       <Router>
         <RecoilRoot>
           <AllRoutes />
-          <Toaster richColors />
         </RecoilRoot>
       </Router>
+      <Toaster richColors />
     </>
   );
 }
-
-

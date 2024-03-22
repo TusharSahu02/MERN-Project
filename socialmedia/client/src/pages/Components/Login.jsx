@@ -25,6 +25,7 @@ const Login = () => {
       if (data.error) {
         toast.error(data.error, {
           duration: 2000,
+          richColors: true,
         });
         return;
       }
@@ -34,10 +35,12 @@ const Login = () => {
       // window.location.reload();
       toast.success(data.message, {
         duration: 2000,
+        richColors: true,
       });
     } catch (error) {
       toast.error(error.message, {
         duration: 2000,
+        richColors: true,
       });
     }
   };

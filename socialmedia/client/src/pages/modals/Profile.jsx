@@ -16,7 +16,7 @@ const Profile = ({ closeProfileModal, isProfilePic }) => {
     bio: userEdit.bio,
   });
   const setUser = useSetRecoilState(userAtom);
-
+  const [updating, setUpdating] = useState(false);
   const { handleImageChange, imgURL } = usePreviewImage();
 
   useEffect(() => {
@@ -37,6 +37,7 @@ const Profile = ({ closeProfileModal, isProfilePic }) => {
     e.preventDefault();
 
     try {
+      setUpdating(true);
       const res = await fetch(`/api/users/update/${userEdit._id}`, {
         method: "PUT",
         headers: {
@@ -59,10 +60,14 @@ const Profile = ({ closeProfileModal, isProfilePic }) => {
       });
       setUser(data);
       localStorage.setItem("user-chipper", JSON.stringify(data));
+      closeProfileModal();
+      
     } catch (error) {
       toast.error(error.message, {
         duration: 2000,
       });
+    } finally {
+      setUpdating(false);
     }
   };
   return (
@@ -101,7 +106,7 @@ const Profile = ({ closeProfileModal, isProfilePic }) => {
               className="cursor-pointer  text-black font-bold rounded-full bg-[#fff] px-4 py-1"
               onClick={handleSubmit}
             >
-              Save Changes
+              {updating ? "Updating..." : "Update Profile Pic"}
             </div>
           </div>
         </div>

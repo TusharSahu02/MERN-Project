@@ -22,9 +22,9 @@ cloudinary.config({
 });
 
 // it allows us to parse JSON data from the incoming request body
-app.use(express.json({ limit: "1000mb" }));
+app.use(express.json({ limit: "50mb" }));
 // to parse form data in the request body
-app.use(express.urlencoded({ limit: "1000mb", extended: true }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // it allows us to parse cookies from the request
 app.use(cookieParser());
 
