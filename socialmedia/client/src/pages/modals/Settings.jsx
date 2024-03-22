@@ -71,6 +71,9 @@ const Settings = ({ closeModal }) => {
             </div>
           </div>
         </div>
+        <p className="text-sm text-gray-500 mt-3">
+          ( haven&apos;t implemented this feature yet )
+        </p>
       </div>
     </div>
   );

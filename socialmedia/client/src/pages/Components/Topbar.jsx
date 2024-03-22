@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { BsThreads } from "react-icons/bs";
 import { GrHomeRounded } from "react-icons/gr";
@@ -6,7 +6,7 @@ import { FiSearch, FiLogOut } from "react-icons/fi";
 import { IoCreateOutline } from "react-icons/io5";
 import { LuHeart } from "react-icons/lu";
 import { CiUser } from "react-icons/ci";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Threads from "../modals/Threads";
 import { toast } from "sonner";
 import userAtom from "@/atom/userAtom";
@@ -16,6 +16,14 @@ const Topbar = () => {
   const [activeIcon, setActiveIcon] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [userEdit, setUserEdit] = useRecoilState(userAtom);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setActiveIcon("home");
+    }
+  }, [location]);
 
   const setUser = useSetRecoilState(userAtom);
 
@@ -117,7 +125,7 @@ const Topbar = () => {
             />
           </Link>
           <Link
-            to={`/@${userEdit.username}`}
+            to={`/${userEdit?.username}`}
             className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 ${
               activeIcon === "profile" && "text-white"
             }`}

@@ -21,12 +21,11 @@ import { toast } from "sonner";
 
 import { IoMdMore } from "react-icons/io";
 import { Button } from "@/components/ui/button";
-
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Threads from "./Threads";
 import Replies from "./Replies";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import userAtom from "@/atom/userAtom";
 
 import { MdModeEditOutline } from "react-icons/md";
@@ -35,12 +34,14 @@ import Settings from "../modals/Settings";
 import Profile from "../modals/Profile";
 import usePreviewImage from "@/hooks/usePreviewImage";
 
-const ProfileHeader = () => {
+const ProfileHeader = ({ user }) => {
   const [userEdit, setUserEdit] = useRecoilState(userAtom);
   const [activeTab, setActiveTab] = useState("threads");
   const [showModal, setShowModal] = useState(false);
+
   const [showProfileModal, setShowProfileModal] = useState(false);
   const setUser = useSetRecoilState(userAtom);
+
   const [inputs, setInputs] = useState({
     name: userEdit.name,
     username: userEdit.username,
@@ -48,12 +49,19 @@ const ProfileHeader = () => {
     bio: userEdit.bio,
   });
 
+  const [updating, setUpdating] = useState(false);
+
+  const currentUser = useRecoilValue(userAtom);
+  const [following, setFollowing] = useState(
+    user.followers.includes(currentUser._id)
+  );
+
   const fileRef = useRef(null);
 
   const { handleImageChange, imgURL } = usePreviewImage();
 
-  const isProfilePic = userEdit.profilePic
-    ? userEdit.profilePic
+  const isProfilePic = userEdit?.profilePic
+    ? userEdit?.profilePic
     : "https://preview.redd.it/reddit-avatars-anyone-v0-0yghd1cewi0a1.png?width=587&format=png&auto=webp&s=54c04fa2f1c795ac2d5c112d5ad1a0015f696775";
 
   const handleTabChange = (tab) => {
@@ -67,6 +75,51 @@ const ProfileHeader = () => {
         duration: 2000,
       });
     });
+  };
+  const handleFollowAndUnfollow = async () => {
+    if (!currentUser) {
+      toast.error("Please login first", {
+        duration: 2000,
+      });
+      return;
+    }
+    if (updating) return;
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/users/follow/${user._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        toast.error(data.error, {
+          duration: 2000,
+        });
+        return;
+      }
+      if (following) {
+        toast.success(data.message, {
+          duration: 2000,
+        });
+        user.followers.pop();
+      } else {
+        toast.success(data.message, {
+          duration: 2000,
+        });
+        user.followers.push(currentUser._id);
+      }
+      setFollowing(!following);
+    } catch (error) {
+      toast.error(error.message, {
+        duration: 2000,
+      });
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const handleTextareaChange = (event) => {
@@ -127,6 +180,7 @@ const ProfileHeader = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setUpdating(true);
       const res = await fetch(`/api/users/update/${userEdit._id}`, {
         method: "PUT",
         headers: {
@@ -144,7 +198,7 @@ const ProfileHeader = () => {
         return;
       }
 
-      toast.success("Profile Updated Successfully", {
+      toast.success("Profile Updated Successfully, reload to see the changes", {
         duration: 2000,
       });
       setUser(data);
@@ -153,6 +207,8 @@ const ProfileHeader = () => {
       toast.error(error.message, {
         duration: 2000,
       });
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -173,7 +229,7 @@ const ProfileHeader = () => {
           onClick={handleProfileModal}
         >
           <img
-            className="h-full hover:opacity-50 transition-opacity  border-[1px] border-gray-700 w-full object-cover rounded-full"
+            className="h-full hover:opacity-50 transition-opacity duration-300  border-[1px] border-gray-700 w-full object-cover rounded-full"
             src={isProfilePic}
             alt=""
           />
@@ -182,9 +238,9 @@ const ProfileHeader = () => {
       <div>
         <p>{userEdit.bio}</p>
       </div>
-      <div className="my-3 flex items-center justify-between">
+      <div className="my-3 flex items-center justify-between"testing  >
         <p className="text-sm text-gray-400 hover:underline transition-all w-max cursor-pointer">
-          25 followers
+          {user.followers.length} followers
         </p>
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -210,89 +266,119 @@ const ProfileHeader = () => {
         </DropdownMenu>
       </div>
 
-      <Dialog>
-        <div className="flex items-center justify-center  border-[1px] border-gray-700 py-1 rounded-lg text-sm cursor-pointer">
-          <DialogTrigger className="size-full"> Edit profile</DialogTrigger>
-          <DialogContent className="bg-black">
-            <DialogHeader>
-              <DialogTitle>Edit profile</DialogTitle>
-              <DialogDescription>
-                Make changes to your profile here. Click save when you&apos;re
-                done.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="size-full cursor-pointer flex items-center justify-center">
-                <div className="relative ">
-                  <img
-                    className="size-[100px] object-cover rounded-full hover:opacity-50 transition-opacity duration-300"
-                    src={imgURL || isProfilePic}
-                    alt=""
-                    onClick={() => fileRef.current.click()}
-                  />
-                  <input
-                    type="file"
-                    hidden
-                    ref={fileRef}
-                    onChange={handleImageChange}
-                  />
+      {currentUser._id !== user._id && (
+        <div className="flex justify-center items-center">
+          {following ? (
+            <Button
+              onClick={handleFollowAndUnfollow}
+              className="bg-transparent text-white border w-full  hover:bg-white hover:text-black transition-colors duration-300 "
+              disabled={updating}
+            >
+              {updating ? "loading.." : "Unfollow"}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleFollowAndUnfollow}
+              className="bg-white text-black w-full hover:bg-black hover:text-white transition-colors duration-300 hover:border"
+              disabled={updating}
+            >
+              {updating ? "loading.." : "Follow"}
+            </Button>
+          )}
+        </div>
+      )}
 
-                  <div className="top-0 -right-2 size-8 flex items-center justify-center rounded-full bg-[#000000a3] absolute ml-3 ">
-                    <MdModeEditOutline size={22} />
+      {currentUser._id === user._id && (
+        <Dialog>
+          <div className="flex items-center justify-center  border-[1px] border-gray-700 py-1 rounded-lg text-sm cursor-pointer">
+            <DialogTrigger className="size-full"> Edit profile</DialogTrigger>
+            <DialogContent className="bg-black">
+              <DialogHeader>
+                <DialogTitle>Edit profile</DialogTitle>
+                <DialogDescription>
+                  Make changes to your profile here. Click save when you&apos;re
+                  done.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="size-full cursor-pointer flex items-center justify-center">
+                  <div className="relative ">
+                    <img
+                      className="size-[100px] object-cover rounded-full hover:opacity-50 transition-opacity duration-300"
+                      src={imgURL || isProfilePic}
+                      alt=""
+                      onClick={() => fileRef.current.click()}
+                    />
+                    <input
+                      type="file"
+                      hidden
+                      ref={fileRef}
+                      onChange={handleImageChange}
+                    />
+
+                    <div className="top-0 -right-2 size-8 flex items-center justify-center rounded-full bg-[#000000a3] absolute ml-3 ">
+                      <MdModeEditOutline size={22} />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Username
-                </Label>
-                <Input
-                  disabled
-                  defaultValue={`@${userEdit.username}`}
-                  className="col-span-3 bg-black"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Email
-                </Label>
-                <Input
-                  disabled
-                  defaultValue={userEdit.email}
-                  className="col-span-3 bg-black"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  className="col-span-3 bg-black"
-                  value={inputs.name}
-                  onChange={(e) =>
-                    setInputs({ ...inputs, name: e.target.value })
-                  }
-                />
-              </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Username
+                  </Label>
+                  <Input
+                    disabled
+                    defaultValue={`@${inputs.username}`}
+                    className="col-span-3 bg-black"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Email
+                  </Label>
+                  <Input
+                    disabled
+                    defaultValue={inputs.email}
+                    className="col-span-3 bg-black"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Name
+                  </Label>
+                  <Input
+                    className="col-span-3 bg-black"
+                    value={inputs.name}
+                    onChange={(e) =>
+                      setInputs({ ...inputs, name: e.target.value })
+                    }
+                  />
+                </div>
 
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
-                  Bio
-                </Label>
-                <Textarea
-                  className="col-span-3  bg-black"
-                  onChange={handleTextareaChange}
-                  value={inputs.bio}
-                  placeholder="Add a bio"
-                />
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="username" className="text-right">
+                    Bio
+                  </Label>
+                  <Textarea
+                    className="col-span-3  bg-black"
+                    onChange={handleTextareaChange}
+                    value={inputs.bio}
+                    placeholder="Add a bio"
+                  />
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleSubmit}>Save changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </div>
-      </Dialog>
+              <DialogFooter>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={updating}
+                  className="bg-white border-white border-[1px] text-black hover:bg-transparent hover:text-white hover:border-[1px] hover:border-white transition-colors duration-300"
+                >
+                  {updating ? "loading..." : "Save changes"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </div>
+        </Dialog>
+      )}
 
       <div className="flex">
         <div
