@@ -7,7 +7,7 @@ import {
   getPost,
   likeUnlike,
   replyToPost,
-  getFeedPost
+  getFeedPost,
 } from "../controllers/post.js";
 
 const router = express.Router();
@@ -20,8 +20,8 @@ router.post("/create", protectRoute, createPost);
 
 router.delete("/:id", protectRoute, deletePost);
 
-router.post("/like/:id", protectRoute, likeUnlike);
+router.put("/like/:id", protectRoute, likeUnlike);
 
-router.post("/reply/:id", protectRoute, replyToPost);
+router.put("/reply/:id", protectRoute, replyToPost);
 
 export default router;

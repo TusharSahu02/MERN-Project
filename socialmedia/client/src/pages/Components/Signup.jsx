@@ -67,7 +67,7 @@ const Signup = () => {
             className="w-full bg-transparent"
             value={inputs.username}
             onChange={(e) =>
-              setInputs({ ...inputs, username: e.target.valuetoLowerCase() })
+              setInputs({ ...inputs, username: e.target.value.toLowerCase() })
             }
             onKeyPress={(e) => {
               if (e.key === e.key.toUpperCase() && e.key.length === 1) {

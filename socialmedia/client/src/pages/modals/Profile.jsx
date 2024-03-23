@@ -5,7 +5,7 @@ import { useRecoilState, useSetRecoilState } from "recoil";
 import usePreviewImage from "@/hooks/usePreviewImage";
 import { toast } from "sonner";
 
-const Profile = ({ closeProfileModal, isProfilePic }) => {
+const Profile = ({ closeProfileModal, isProfilePic, currentUser, userId }) => {
   const [userEdit, setUserEdit] = useRecoilState(userAtom);
   const modalRef = useRef(null);
   const fileRef = useRef(null);
@@ -15,6 +15,7 @@ const Profile = ({ closeProfileModal, isProfilePic }) => {
     email: userEdit.email,
     bio: userEdit.bio,
   });
+
   const setUser = useSetRecoilState(userAtom);
   const [updating, setUpdating] = useState(false);
   const { handleImageChange, imgURL } = usePreviewImage();
@@ -61,7 +62,6 @@ const Profile = ({ closeProfileModal, isProfilePic }) => {
       setUser(data);
       localStorage.setItem("user-chipper", JSON.stringify(data));
       closeProfileModal();
-      
     } catch (error) {
       toast.error(error.message, {
         duration: 2000,
@@ -75,40 +75,56 @@ const Profile = ({ closeProfileModal, isProfilePic }) => {
       <div ref={modalRef} className="flex items-center justify-center flex-col">
         <div className="w-full mb-4 flex items-center justify-between">
           <div></div>
-          <h1 className="text-md font-bold">Your Profile Pic</h1>
           <IoIosCloseCircleOutline
             size={22}
             onClick={closeProfileModal}
             className="cursor-pointer"
           />
         </div>
-        {/* outside this */}
         <div className="w-[500px]  border-[1px] max-h-[800px] overflow-scroll border-[#383b41] p-8 bg-[#1f1f21] rounded-xl">
-          <p className="text-gray-500 text-sm mb-4 items-center flex justify-center">
-            Click on the image to upload a new profile picture
-          </p>
-          <div className="flex size-full mb-4 items-center justify-center">
-            <img
-              className="size-[400px] cursor-pointer object-cover rounded-full"
-              src={imgURL || isProfilePic}
-              alt=""
-              onClick={() => fileRef.current.click()}
-            />
-            <input
-              type="file"
-              hidden
-              ref={fileRef}
-              onChange={handleImageChange}
-            />
-          </div>
-          <div className="w-full flex justify-center">
-            <div
-              className="cursor-pointer  text-black font-bold rounded-full bg-[#fff] px-4 py-1"
-              onClick={handleSubmit}
-            >
-              {updating ? "Updating..." : "Update Profile Pic"}
+          {currentUser === userId && (
+            <p className="text-gray-500 text-center text-sm mb-4">
+              Click on the image to upload a new profile picture
+            </p>
+          )}
+
+          {currentUser === userId ? (
+            <div className="flex size-full mb-4 items-center justify-center">
+              <img
+                className="size-[400px] cursor-pointer object-cover rounded-full"
+                src={imgURL || isProfilePic}
+                alt=""
+                onClick={() => fileRef.current.click()}
+              />
+              <input
+                type="file"
+                hidden
+                ref={fileRef}
+                onChange={handleImageChange}
+              />
             </div>
-          </div>
+          ) : (
+            <div className="flex size-full mb-4 items-center justify-center">
+              <img
+                className="size-[400px] cursor-pointer object-cover rounded-full"
+                src={imgURL || isProfilePic}
+                alt=""
+              />
+            </div>
+          )}
+
+          
+
+          {currentUser === userId && (
+            <div className="w-full flex justify-center">
+              <div
+                className="cursor-pointer  text-black font-bold rounded-full bg-[#fff] px-4 py-1"
+                onClick={handleSubmit}
+              >
+                {updating ? "Updating..." : "Update Profile Pic"}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

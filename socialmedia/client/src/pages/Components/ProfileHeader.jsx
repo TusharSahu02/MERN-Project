@@ -65,7 +65,7 @@ const ProfileHeader = ({ user }) => {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
-  
+
   const copyUrl = () => {
     const currentUrl = window.location.href;
     navigator.clipboard.writeText(currentUrl).then(() => {
@@ -215,11 +215,11 @@ const ProfileHeader = ({ user }) => {
     <div>
       <div className="flex justify-between items-center">
         <div className="w-[80%]">
-          <h1 className="text-2xl font-bold cursor-pointer">{user.name}</h1>
+          <h1 className="text-2xl font-bold cursor-pointer">{user?.name}</h1>
           <div className="flex items-center">
-            <p className=" text-md">{user.username}</p>
+            <p className=" text-md">{user?.username}</p>
             <div className="ml-1 px-3 py-1 text-[12px] rounded-full bg-gray-800 cursor-pointer">
-              <p className="text-[#6B7280]">threads.net</p>
+              <p className="text-[#6B7280]">chipper.net</p>
             </div>
           </div>
         </div>
@@ -235,11 +235,11 @@ const ProfileHeader = ({ user }) => {
         </div>
       </div>
       <div>
-        <p>{user.bio}</p>
+        <p>{user?.bio}</p>
       </div>
       <div className="my-3 flex items-center justify-between">
         <p className="text-sm text-gray-400 hover:underline transition-all w-max cursor-pointer">
-          {user.followers.length} followers
+          {user?.followers.length} followers
         </p>
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -417,6 +417,8 @@ const ProfileHeader = ({ user }) => {
         <Profile
           closeProfileModal={closeProfileModal}
           isProfilePic={isProfilePic}
+          currentUser={currentUser._id}
+          userId={user._id}
         />
       )}
     </div>

@@ -11,10 +11,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { useRecoilValue } from "recoil";
+import userAtom from "@/atom/userAtom";
 
-const Post = ({ post, author }) => {
-  const [liked, setLiked] = useState(false);
+const Post = ({ post: post_, author }) => {
+  const [post, setPost] = useState(post_);
+  const loggedUser = useRecoilValue(userAtom);
+  const [liked, setLiked] = useState(post?.likes?.includes(loggedUser?._id));
   const [user, setUser] = useState(null);
+  const [liking, setLiking] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +27,6 @@ const Post = ({ post, author }) => {
       try {
         const res = await fetch(`/api/users/profile/${author}`);
         const data = await res.json();
-        // console.log(data);
 
         if (data.error) {
           toast.error(data.error, {
@@ -41,6 +45,51 @@ const Post = ({ post, author }) => {
 
     getUser();
   }, [author]);
+
+  const handleLikeAndUnlike = async () => {
+    if (!user) {
+      toast.error("Please login first", {
+        duration: 2000,
+      });
+      return;
+    }
+
+    if (liking) return;
+    setLiking(true);
+
+    try {
+      const res = await fetch(`/api/posts/like/${post?._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // body: JSON.stringify({ userId: user?._id }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        toast.error(data.error, {
+          duration: 2000,
+        });
+        return;
+      }
+
+      if (!liked) {
+        setPost({ ...post, likes: [...post?.likes, user?._id] });
+      } else {
+        setPost({
+          ...post,
+          likes: post?.likes.filter((id) => id !== user?._id),
+        });
+      }
+      setLiked(!liked);
+    } catch (error) {
+      toast.error(error, {
+        duration: 2000,
+      });
+    } finally {
+      setLiking(false);
+    }
+  };
 
   const isProfilePic = user?.profilePic
     ? user?.profilePic
@@ -163,7 +212,7 @@ const Post = ({ post, author }) => {
             role="img"
             viewBox="0 0 24 22"
             width="20"
-            onClick={() => setLiked(!liked)}
+            onClick={handleLikeAndUnlike}
             className={`mr-4 size-6 ${liked ? "svg-like bounce" : ""}`}
           >
             <path
@@ -252,9 +301,7 @@ const Post = ({ post, author }) => {
             {post.replies.length} comments
           </p>
           <p className="mx-2 text-gray-700 text-sm">•</p>
-          <p className="text-gray-600 text-sm">
-            {post.likes.length + (liked ? 1 : 0)} likes
-          </p>
+          <p className="text-gray-600 text-sm">{post.likes.length} likes</p>
         </div>
       </div>
     </Link>

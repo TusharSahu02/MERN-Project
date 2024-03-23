@@ -197,6 +197,25 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+const allusers = async (req, res) => {
+  try {
+    // all users in database
+    // dont add the logged in user or current user
+    const currentUserId = req.user._id;
+    const users = await User.find({ _id: { $ne: currentUserId } })
+      .select("-password")
+      .select("-updatedAt")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    console.log("Error in allusers : ", error.mesage);
+  }
+};
+
+
+
 export {
   signupUser,
   loginUser,
@@ -204,4 +223,5 @@ export {
   logout,
   followUser,
   getUserProfile,
+  allusers,
 };

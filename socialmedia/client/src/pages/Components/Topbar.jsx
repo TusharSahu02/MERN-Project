@@ -81,7 +81,7 @@ const Topbar = () => {
         <div className="flex items-center justify-between w-[500px]">
           <Link
             to={"/"}
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 ${
+            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500 ${
               activeIcon === "home" && "text-white"
             }`}
             onClick={() => handleClick("home")}
@@ -95,7 +95,7 @@ const Topbar = () => {
           </Link>
           <Link
             to={"/search"}
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 ${
+            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
               activeIcon === "search" && "text-white"
             }`}
             onClick={() => handleClick("search")}
@@ -106,14 +106,14 @@ const Topbar = () => {
             />
           </Link>
           <div
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 `}
+            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500`}
             onClick={handleModal}
           >
             <IoCreateOutline size={28} color={"#635f5f"} />
           </div>
           <Link
             to={"/activity"}
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 ${
+            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
               activeIcon === "activity" && "text-white"
             }`}
             onClick={() => handleClick("activity")}
@@ -126,7 +126,7 @@ const Topbar = () => {
           </Link>
           <Link
             to={`/${userEdit?.username}`}
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 ${
+            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
               activeIcon === "profile" && "text-white"
             }`}
             onClick={() => handleClick("profile")}
