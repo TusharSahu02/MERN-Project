@@ -118,6 +118,7 @@ const Threads = ({ closeModal }) => {
                   placeholder="Enter your content here..."
                   onChange={handleTextareaChange}
                   value={textareaValue}
+                  autoFocus
                 ></textarea>
                 {/* TODO: < Add : Drag and Drop feature >*/}
                 {imgURL && (
