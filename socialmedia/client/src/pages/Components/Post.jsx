@@ -36,6 +36,7 @@ const Post = ({ post: post_, author }) => {
           });
           return;
         }
+
         setUser(data);
       } catch (error) {
         toast.error(error, {
@@ -90,6 +91,42 @@ const Post = ({ post: post_, author }) => {
       });
     } finally {
       setLiking(false);
+    }
+  };
+
+  const handleDeletePost = async (e) => {
+    if (!user) {
+      toast.error("Please login first", {
+        duration: 2000,
+      });
+      return;
+    }
+
+    try {
+      e.preventDefault();
+      if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+      const res = await fetch(`/api/posts/${post?._id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      if (data.error) {
+        toast.error(data.error, {
+          duration: 2000,
+        });
+        return;
+      }
+
+      toast.success("Post deleted successfully", {
+        duration: 2000,
+      });
+    } catch (error) {
+      toast.error(error, {
+        duration: 2000,
+      });
     }
   };
 
@@ -170,25 +207,30 @@ const Post = ({ post: post_, author }) => {
                   addSuffix: true,
                 })}
               </p>
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <IoIosMore size={20} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-[#000000de] text-white">
-                  <DropdownMenuItem className="cursor-pointer ">
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
+              {post?.author === loggedUser?._id && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <IoIosMore size={20} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-[#000000de] text-white">
+                    <DropdownMenuItem className="cursor-pointer ">
+                      Edit
+                    </DropdownMenuItem>
+                    {/* <DropdownMenuItem className="cursor-pointer">
                     Save
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer ">
-                    Pin to profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer text-red-500">
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuItem> */}
+                    <DropdownMenuItem className="cursor-pointer ">
+                      Pin to profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleDeletePost}
+                      className="cursor-pointer text-red-500"
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
           <div

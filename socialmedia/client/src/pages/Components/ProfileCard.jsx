@@ -87,7 +87,9 @@ const ProfileCard = ({
           />
         </div>
         <div className="ml-3 ">
-          <h1 className=" font-semibold">{name}</h1>
+          <h1 className=" font-semibold hover:underline transition-all duration-300">
+            {name}
+          </h1>
           <p className=" text-gray-500 leading-none ">{username}</p>
           <p className="mt-2">{followers?.length} followers</p>
         </div>

@@ -14,16 +14,60 @@ const NoUsers = ({ user, key }) => {
   const [following, setFollowing] = useState(
     user?.followers.includes(currentUser._id)
   );
+  const handleFollowAndUnfollow = async () => {
+    if (!currentUser) {
+      toast.error("Please login first", {
+        duration: 2000,
+      });
+      return;
+    }
+    if (updating) return;
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/users/follow/${user?._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
+      const data = await res.json();
+
+      if (data.error) {
+        toast.error(data.error, {
+          duration: 2000,
+        });
+        return;
+      }
+      if (following) {
+        toast.success(data.message, {
+          duration: 2000,
+        });
+        user?.followers.pop();
+      } else {
+        toast.success(data.message, {
+          duration: 2000,
+        });
+        user?.followers.push(currentUser._id);
+      }
+      setFollowing(!following);
+    } catch (error) {
+      toast.error(error.message, {
+        duration: 2000,
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
   return (
-    <div
-      className="border-[1px] size-full border-gray-700 p-3 rounded-xl hover:scale-[102%] cursor-pointer transition-all duration-300"
-      onClick={(e) => {
-        e.preventDefault();
-        navigate(`/${user?.username}`);
-      }}
-    >
-      <div className=" flex items-center justify-center">
+    <div className="border-[1px] size-full border-gray-700 p-3 rounded-xl hover:scale-[102%] cursor-pointer transition-all duration-300">
+      <div
+        onClick={(e) => {
+          e.preventDefault();
+          navigate(`/${user?.username}`);
+        }}
+        className=" flex items-center justify-center"
+      >
         <img
           src={
             user?.profilePic
@@ -35,7 +79,13 @@ const NoUsers = ({ user, key }) => {
         />
       </div>
       <div className="border-b-[1px] border-gray-700 -mt-12"></div>
-      <div className="mt-12 flex items-center jc flex-col">
+      <div
+        onClick={(e) => {
+          e.preventDefault();
+          navigate(`/${user?.username}`);
+        }}
+        className="mt-12 flex items-center jc flex-col"
+      >
         <h1 className="text-xl">{user.name}</h1>
         <p className="text-gray-500">@{user.username}</p>
         <p className="text-gray-400 text-sm text-center truncate max-w-[80%]">
@@ -47,8 +97,29 @@ const NoUsers = ({ user, key }) => {
           followers
         </p>
       </div>
-      <div className="border-[1px] bg-white text-black flex items-center justify-center py-2 mt-3 mx-3 rounded-xl border-gray-700">
-        Follow
+      <div
+        onClick={(e) => {
+          e.preventDefault();
+        }}
+        className="mt-3"
+      >
+        {following ? (
+          <Button
+            onClick={handleFollowAndUnfollow}
+            className="bg-transparent text-white border w-full  hover:bg-white hover:text-black transition-colors duration-300 "
+            disabled={updating}
+          >
+            {updating ? "loading.." : "Unfollow"}
+          </Button>
+        ) : (
+          <Button
+            onClick={handleFollowAndUnfollow}
+            className="bg-white text-black w-full hover:bg-black hover:text-white transition-colors duration-300 hover:border"
+            disabled={updating}
+          >
+            {updating ? "loading.." : "Follow"}
+          </Button>
+        )}
       </div>
     </div>
   );

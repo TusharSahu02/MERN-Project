@@ -1,39 +1,106 @@
-import React from "react";
-import UserPost from "./UserPost";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import Post from "./Post";
 
-const Threads = () => {
+const Threads = ({ username, currentUser }) => {
+  const [loading, setLoading] = useState(true);
+  const [threads, setThreads] = useState([]);
+
+  useEffect(() => {
+    // window.scrollTo(0, 0);
+    const getThreads = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/posts/user/${username}`);
+        const data = await res.json();
+
+        setThreads(data);
+      } catch (error) {
+        toast.error(error.message, {
+          duration: 2000,
+        });
+        setThreads([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getThreads();
+  }, [username]);
+
+  if (!loading && !threads.length) {
+    return (
+      <>
+        <div className="h-[200px] flex items-center justify-center flex-col">
+          <h1 className="text-gray-500">No Threads</h1>
+          {currentUser?.username === username && (
+            <button className="text-gray-500 border-[1px] border-gray-500 px-3 py-1 rounded-full p-2 mt-5">
+              Start your first thread
+            </button>
+          )}
+          {/* <button>Start your first thread</button> */}
+        </div>
+      </>
+    );
+  }
+
+  if (loading) {
+    return (
+      <>
+        <PostSkeleton />
+        <PostSkeleton />
+        <PostSkeleton />
+      </>
+    );
+  }
+
   return (
     <>
-      <UserPost
-        likes={1200}
-        replies={200}
-        avatar="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
-        postImg="https://images.unsplash.com/photo-1710595638861-a6f9680649b6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        postTitle="loading tushar..."
-      />
-      <UserPost
-        likes={200}
-        replies={100}
-        avatar="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
-        postImg="https://images.unsplash.com/photo-1710401421451-bc096d4667f5?q=80&w=1920&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        postTitle="loading2tushar..."
-      />
-      <UserPost
-        likes={12400}
-        replies={2300}
-        avatar="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
-        postImg="https://images.unsplash.com/photo-1707344088547-3cf7cea5ca49?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        postTitle="loading 3 tushar..."
-      />
-      <UserPost
-        likes={61200}
-        replies={1200}
-        avatar="https://creatorspace.imgix.net/users/cltu6476600f7qh01jfaddgk0/OZZAm84WNZiQBi6W-fotor-ai-2023072804554.jpg?w=300&h=300"
-        postImg="https://images.unsplash.com/photo-1710097092298-75d5c777a9bf?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        postTitle="loading 4 tushar..."
-      />
+      {threads.map((thread) => (
+        <>
+          <Post key={thread._id} post={thread} author={thread.author} />
+        </>
+      ))}
     </>
   );
 };
 
 export default Threads;
+
+const PostSkeleton = () => {
+  return (
+    <>
+      <div className="flex my-3 border-b-[1px] h-full pb-7 border-gray-700">
+        <div className="flex mb-4 gap-3">
+          <div className="flex flex-col items-center">
+            <div className="size-[40px] object-cover rounded-full cursor-pointer">
+              <Skeleton className="size-full rounded-full" />
+            </div>
+          </div>
+        </div>
+        <div className="w-full ml-3">
+          <div className="flex justify-between items-center my-2">
+            <Skeleton className="h-2 w-[30%]" />
+            <Skeleton className="h-2 w-[5%]" />
+          </div>
+          <Skeleton className="h-2 w-[70%] my-2" />
+          <Skeleton className="h-2 w-[50%] my-2" />
+          <Skeleton className="h-2 w-[60%] my-2" />
+          <div className="w-full overflow-hidden">
+            <Skeleton className="h-[300px] w-full" />
+          </div>
+          <div className="flex my-3 gap-3">
+            <Skeleton className="size-[30px] rounded-full " />
+            <Skeleton className="size-[30px] rounded-full " />
+            <Skeleton className="size-[30px] rounded-full " />
+            <Skeleton className="size-[30px] rounded-full " />
+          </div>
+          <div className="flex items-center gap-3 w-[35%]  ">
+            <Skeleton className="h-2 w-full" />
+            <Skeleton className="h-2 w-full" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};

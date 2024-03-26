@@ -54,6 +54,24 @@ const Home = () => {
     getFeedPost();
   }, []);
 
+  if (!loading && posts?.length === 0) {
+    return (
+      <>
+        <div className="mt-10">
+          <h1 className=" text-center text-2xl">Welcome to Chipper</h1>
+          <h1 className="text-center text-gray-500">
+            ( Follow people to start seeing the photos they share )
+          </h1>
+        </div>
+        <div className="grid gap-6 place-items-center grid-cols-2 mt-10 pb-[100px]">
+          {users.map((user) => (
+            <NoUsers key={user._id} user={user} />
+          ))}
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <HomeThread />
@@ -62,22 +80,6 @@ const Home = () => {
           <HomeSkeleton />
           <HomeSkeleton />
           <HomeSkeleton />
-        </>
-      )}
-
-      {!loading && posts.length === 0 && (
-        <>
-          <div className="mt-10">
-            <h1 className=" text-center text-2xl">Welcome to Chipper</h1>
-            <h1 className="text-center text-gray-500">
-              ( Follow people to start seeing the photos they share )
-            </h1>
-          </div>
-          <div className="grid gap-6 place-items-center grid-cols-2 mt-10 pb-[100px]">
-            {users.map((user) => (
-              <NoUsers key={user._id} user={user} />
-            ))}
-          </div>
         </>
       )}
 

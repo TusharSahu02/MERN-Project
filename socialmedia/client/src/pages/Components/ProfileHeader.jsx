@@ -47,15 +47,15 @@ const ProfileHeader = ({ user }) => {
   const { handleImageChange, imgURL } = usePreviewImage();
 
   const [inputs, setInputs] = useState({
-    name: userEdit.name,
-    username: userEdit.username,
-    email: userEdit.email,
-    bio: userEdit.bio,
+    name: userEdit?.name,
+    username: userEdit?.username,
+    email: userEdit?.email,
+    bio: userEdit?.bio,
   });
 
   const currentUser = useRecoilValue(userAtom);
   const [following, setFollowing] = useState(
-    user.followers.includes(currentUser._id)
+    user.followers.includes(currentUser?._id)
   );
 
   const isProfilePic = user?.profilePic
@@ -249,23 +249,30 @@ const ProfileHeader = ({ user }) => {
             <DropdownMenuItem onClick={copyUrl} className="cursor-pointer ">
               copy URL
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">
-              Saved
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer " onClick={handleModal}>
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer "
-              onClick={handleLogout}
-            >
-              Logout
-            </DropdownMenuItem>
+            {currentUser.username === user?.username && (
+              <>
+                <DropdownMenuItem className="cursor-pointer">
+                  Saved
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer "
+                  onClick={handleModal}
+                >
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer "
+                  onClick={handleLogout}
+                >
+                  Logout
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {currentUser._id !== user._id && (
+      {currentUser?._id !== user._id && (
         <div className="flex justify-center items-center">
           {following ? (
             <Button
@@ -287,7 +294,7 @@ const ProfileHeader = ({ user }) => {
         </div>
       )}
 
-      {currentUser._id === user._id && (
+      {currentUser?._id === user._id && (
         <Dialog>
           <div className="flex items-center justify-center  border-[1px] border-gray-700 py-1 rounded-lg text-sm cursor-pointer">
             <DialogTrigger className="size-full"> Edit profile</DialogTrigger>
@@ -410,7 +417,9 @@ const ProfileHeader = ({ user }) => {
             activeTab === "threads" ? "translateX(0)" : "translateX(100%)",
         }}
       ></div>
-      {activeTab === "threads" && <Threads />}
+      {activeTab === "threads" && (
+        <Threads currentUser={currentUser} username={user?.username} />
+      )}
       {activeTab === "replies" && <Replies />}
       {showModal && <Settings closeModal={closeModal} />}
       {showProfileModal && (
