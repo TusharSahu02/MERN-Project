@@ -174,6 +174,7 @@ const updateUser = async (req, res) => {
 const getUserProfile = async (req, res) => {
   const { query } = req.params;
   try {
+    
     let user;
 
     if (mongoose.Types.ObjectId.isValid(query)) {
@@ -213,8 +214,6 @@ const allusers = async (req, res) => {
     console.log("Error in allusers : ", error.mesage);
   }
 };
-
-
 
 export {
   signupUser,

@@ -3,14 +3,15 @@ import { IoIosCloseCircleOutline } from "react-icons/io";
 import { useState, useRef, useEffect } from "react";
 import usePreviewImage from "@/hooks/usePreviewImage";
 import { toast } from "sonner";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "@/atom/userAtom";
+import postsAtom from "@/atom/postAtom";
 
 const MAX_CHARS = 500;
 
-const Reply = ({ closeModal, post: post_ }) => {
+const Reply = ({ closeModal, post }) => {
   const [textareaValue, setTextareaValue] = useState("");
-
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const modalRef = useRef(null);
   const imageRef = useRef(null);
 
@@ -18,7 +19,7 @@ const Reply = ({ closeModal, post: post_ }) => {
   const [postUser, setPostUser] = useState("");
   const [updating, setUpdating] = useState(false);
 
-  const [post, setPost] = useState(post_);
+  // const [post, setPost] = useState(post_);
 
   const [remainingChars, setRemainingChars] = useState(MAX_CHARS);
   const { handleImageChange, imgURL, setImgURL } = usePreviewImage();
@@ -89,12 +90,17 @@ const Reply = ({ closeModal, post: post_ }) => {
         return;
       }
 
-      setPost({ ...post, replies: [...post?.replies, data?.reply] });
+      const updatedPost = posts?.map((p) => {
+        if (p?._id === post?._id) {
+          return data;
+        }
+        return p;
+      });
+      setPosts(updatedPost);
 
       toast.success("Reply posted successfully", {
         duration: 2000,
       });
-      console.log(data);
 
       setImgURL("");
       setTextareaValue("");

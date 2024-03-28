@@ -69,8 +69,8 @@ const Topbar = () => {
   };
 
   return (
-    <div className="fixed top-0 container left-1/2  transform -translate-x-1/2 translate-y-[0] z-10 bg-black text-white">
-      <div className="flex justify-between items-center py-1 px-16">
+    <div className="fixed top-0 container left-1/2  transform -translate-x-1/2 translate-y-[0] z-10 bg-black text-white ">
+      <div className="flex justify-between items-center py-1 px-1 lg:px-8 ">
         <Link
           to={"/"}
           className={`cursor-pointer ${activeIcon === "home" && "text-white"}`}
@@ -78,10 +78,10 @@ const Topbar = () => {
         >
           <BsThreads size={32} />
         </Link>
-        <div className="flex items-center justify-between w-[500px]">
+        <div className="flex items-center justify-between w-[350px] lg:w-[500px]">
           <Link
             to={"/"}
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500 ${
+            className={`h-[40px] w-[60px] lg:h-[60px] lg:w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500 ${
               activeIcon === "home" && "text-white"
             }`}
             onClick={() => handleClick("home")}
@@ -95,7 +95,7 @@ const Topbar = () => {
           </Link>
           <Link
             to={"/search"}
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
+            className={`h-[40px] w-[60px] lg:h-[60px] lg:w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
               activeIcon === "search" && "text-white"
             }`}
             onClick={() => handleClick("search")}
@@ -106,14 +106,14 @@ const Topbar = () => {
             />
           </Link>
           <div
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500`}
+            className={`h-[40px] w-[60px] lg:h-[60px] lg:w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500`}
             onClick={handleModal}
           >
             <IoCreateOutline size={28} color={"#635f5f"} />
           </div>
           <Link
             to={"/activity"}
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
+            className={`h-[40px] w-[60px] lg:h-[60px] lg:w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
               activeIcon === "activity" && "text-white"
             }`}
             onClick={() => handleClick("activity")}
@@ -126,7 +126,7 @@ const Topbar = () => {
           </Link>
           <Link
             to={`/${userEdit?.username}`}
-            className={`h-[60px] w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
+            className={`h-[40px] w-[60px] lg:h-[60px] lg:w-[90px] flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-900 transition-colors duration-500${
               activeIcon === "profile" && "text-white"
             }`}
             onClick={() => handleClick("profile")}

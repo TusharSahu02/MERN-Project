@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "@/atom/userAtom";
 import Reply from "../modals/Reply";
+import postsAtom from "@/atom/postAtom";
 
-const Post = ({ post: post_, author }) => {
-  const [post, setPost] = useState(post_);
+const Post = ({ post, author, lastReply }) => {
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const loggedUser = useRecoilValue(userAtom);
   const [liked, setLiked] = useState(post?.likes?.includes(loggedUser?._id));
   const [user, setUser] = useState(null);
@@ -66,7 +67,6 @@ const Post = ({ post: post_, author }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        // body: JSON.stringify({ userId: user?._id }),
       });
       const data = await res.json();
       if (data.error) {
@@ -77,12 +77,21 @@ const Post = ({ post: post_, author }) => {
       }
 
       if (!liked) {
-        setPost({ ...post, likes: [...post?.likes, user?._id] });
-      } else {
-        setPost({
-          ...post,
-          likes: post?.likes.filter((id) => id !== user?._id),
+        const updatedPost = posts?.map((p) => {
+          if (p?._id === post?._id) {
+            return { ...p, likes: [...p?.likes, user?._id] };
+          }
+          return p;
         });
+        setPosts(updatedPost);
+      } else {
+        const updatedPost = posts?.map((p) => {
+          if (p?._id === post?._id) {
+            return { ...p, likes: p?.likes.filter((l) => l !== user?._id) };
+          }
+          return p;
+        });
+        setPosts(updatedPost);
       }
       setLiked(!liked);
     } catch (error) {
@@ -123,6 +132,7 @@ const Post = ({ post: post_, author }) => {
       toast.success("Post deleted successfully", {
         duration: 2000,
       });
+      setPosts(posts?.filter((p) => p._id !== post?._id));
     } catch (error) {
       toast.error(error, {
         duration: 2000,
@@ -145,7 +155,11 @@ const Post = ({ post: post_, author }) => {
 
   return (
     <>
-      <Link className="flex my-3 border-b-[1px] h-full pb-7 border-gray-700">
+      <div
+        className={`flex my-3
+      ${!lastReply ? "border-b-[1px] border-gray-800" : ""}
+      h-full pb-7 `}
+      >
         <div className="flex mb-4 gap-3">
           <div className="flex flex-col items-center">
             <Link
@@ -216,9 +230,6 @@ const Post = ({ post: post_, author }) => {
                     <DropdownMenuItem className="cursor-pointer ">
                       Edit
                     </DropdownMenuItem>
-                    {/* <DropdownMenuItem className="cursor-pointer">
-                    Save
-                  </DropdownMenuItem> */}
                     <DropdownMenuItem className="cursor-pointer ">
                       Pin to profile
                     </DropdownMenuItem>
@@ -267,7 +278,9 @@ const Post = ({ post: post_, author }) => {
               viewBox="0 0 24 22"
               width="20"
               onClick={handleLikeAndUnlike}
-              className={`mr-4 size-6 ${liked ? "svg-like bounce" : ""}`}
+              className={`mr-4 size-6 ${
+                liked ? "svg-like bounce" : ""
+              } cursor-pointer`}
             >
               <path
                 d="M1 7.66c0 4.575 3.899 9.086 9.987 12.934.338.203.74.406 1.013.406.283 0 .686-.203 1.013-.406C19.1 16.746 23 12.234 23 7.66 23 3.736 20.245 1 16.672 1 14.603 1 12.98 1.94 12 3.352 11.042 1.952 9.408 1 7.328 1 3.766 1 1 3.736 1 7.66Z"
@@ -358,7 +371,7 @@ const Post = ({ post: post_, author }) => {
             <p className="text-gray-600 text-sm">{post.likes.length} likes</p>
           </div>
         </div>
-      </Link>
+      </div>
       {showModal && <Reply closeModal={closeModal} post={post} />}
     </>
   );

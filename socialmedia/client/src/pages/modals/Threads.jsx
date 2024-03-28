@@ -3,8 +3,10 @@ import { IoIosCloseCircleOutline } from "react-icons/io";
 import { useState, useRef, useEffect } from "react";
 import usePreviewImage from "@/hooks/usePreviewImage";
 import { toast } from "sonner";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "@/atom/userAtom";
+import postsAtom from "@/atom/postAtom";
+import { useParams } from "react-router-dom";
 
 const MAX_CHARS = 500;
 
@@ -14,6 +16,8 @@ const Threads = ({ closeModal }) => {
   const imageRef = useRef(null);
   const user = useRecoilValue(userAtom);
   const [updating, setUpdating] = useState(false);
+  const [posts, setPosts] = useRecoilState(postsAtom);
+  const { username } = useParams();
 
   const [remainingChars, setRemainingChars] = useState(MAX_CHARS);
 
@@ -81,6 +85,11 @@ const Threads = ({ closeModal }) => {
       }
 
       toast.success("Post created successfully");
+
+      if (username === user.username) {
+        setPosts([data, ...posts]);
+      }
+
       closeModal();
       setTextareaValue("");
       setImgURL("");

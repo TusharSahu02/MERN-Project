@@ -4,10 +4,12 @@ import { toast } from "sonner";
 import Post from "./Components/Post";
 import NoUsers from "./Components/NoUsers";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRecoilState } from "recoil";
+import postsAtom from "@/atom/postAtom";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const [users, setUser] = useState([]);
 
   useEffect(() => {
@@ -31,6 +33,7 @@ const Home = () => {
       }
     };
     const getAllUsers = async () => {
+      setUser([]);
       try {
         const res = await fetch("/api/users/allusers");
         const data = await res.json();
@@ -52,29 +55,28 @@ const Home = () => {
 
     getAllUsers();
     getFeedPost();
-  }, []);
-
-  if (!loading && posts?.length === 0) {
-    return (
-      <>
-        <div className="mt-10">
-          <h1 className=" text-center text-2xl">Welcome to Chipper</h1>
-          <h1 className="text-center text-gray-500">
-            ( Follow people to start seeing the photos they share )
-          </h1>
-        </div>
-        <div className="grid gap-6 place-items-center grid-cols-2 mt-10 pb-[100px]">
-          {users.map((user) => (
-            <NoUsers key={user._id} user={user} />
-          ))}
-        </div>
-      </>
-    );
-  }
+  }, [setPosts]);
 
   return (
     <>
       <HomeThread />
+
+      {!loading && posts?.length === 0 && (
+        <>
+          <div className="mt-10">
+            <h1 className=" text-center text-2xl">Welcome to Chipper</h1>
+            <h1 className="text-center text-gray-500">
+              ( Follow people to start seeing the photos they share )
+            </h1>
+          </div>
+          <div className="grid gap-6 place-items-center grid-cols-2 mt-10 pb-[100px]">
+            {users.map((user) => (
+              <NoUsers key={user._id} user={user} />
+            ))}
+          </div>
+        </>
+      )}
+
       {loading && (
         <>
           <HomeSkeleton />
@@ -84,7 +86,12 @@ const Home = () => {
       )}
 
       {posts.map((post) => (
-        <Post key={post._id} post={post} author={post.author} />
+        <Post
+          key={post._id}
+          post={post}
+          author={post.author}
+          lastReply={post.replies[post.replies.length - 1]}
+        />
       ))}
     </>
   );

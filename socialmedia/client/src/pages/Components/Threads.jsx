@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import Post from "./Post";
+import { useRecoilState } from "recoil";
+import postsAtom from "@/atom/postAtom";
 
 const Threads = ({ username, currentUser }) => {
   const [loading, setLoading] = useState(true);
-  const [threads, setThreads] = useState([]);
+  const [threads, setThreads] = useRecoilState(postsAtom);
 
   useEffect(() => {
     // window.scrollTo(0, 0);
@@ -26,7 +28,7 @@ const Threads = ({ username, currentUser }) => {
       }
     };
     getThreads();
-  }, [username]);
+  }, [setThreads, username]);
 
   if (!loading && !threads.length) {
     return (
@@ -38,7 +40,6 @@ const Threads = ({ username, currentUser }) => {
               Start your first thread
             </button>
           )}
-          {/* <button>Start your first thread</button> */}
         </div>
       </>
     );

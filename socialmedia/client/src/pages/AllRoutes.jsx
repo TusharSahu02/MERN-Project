@@ -19,7 +19,7 @@ const AllRoutes = () => {
       {location.pathname !== "/auth" && <Topbar />}
       <div className="container bg-black">
         <div className="flex items-center h-full mt-[80px] justify-center">
-          <div className="w-[550px] h-full pb-10 text-white">
+          <div className="w-[550px] h-full pb-10 text-white ">
             <Routes>
               <Route
                 path="/"

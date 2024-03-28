@@ -1,9 +1,9 @@
 // atoms.js
 import { atom } from "recoil";
 
-const postAtom = atom({
-  key: "postAtom",
+const postsAtom = atom({
+  key: "postsAtom",
   default: [], // Initial state
 });
 
-export default postAtom;
+export default postsAtom;
